@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, type SetStateAction } from "react";
 import gsap from "gsap";
 import { Observer } from "gsap/all";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
@@ -95,32 +95,62 @@ const IMG_FILE = [
 
 // register plugin
 gsap.registerPlugin(ScrollToPlugin, Observer);
-export default function ImgComp() {
-  const scrollerRef = useRef<HTMLDivElement>(null);
+
+interface ImgCompProps {
+  startScrollingDown: boolean;
+  setStartScrollingDown: React.Dispatch<SetStateAction<boolean>>;
+}
+export default function ImgComp({
+  startScrollingDown,
+  setStartScrollingDown,
+}: ImgCompProps) {
   const scrollTween = useRef<gsap.core.Timeline | null>(null);
+  const currentDirection = useRef<"up" | "down" | null>(null);
 
   // Get current max scroll value
   const getMaxScroll = () => {
     return Math.max(0, document.body.scrollHeight - window.innerHeight);
   };
 
-  // Clear any pending animations
-  const clearAutoScroll = () => {
-    gsap.killTweensOf(window);
+  useEffect(() => {
+    if (startScrollingDown) {
+      handleAutoScrollDown();
+    }
+  }, [startScrollingDown]);
+
+  // Stop any existing scroll
+  const stopCurrentScroll = () => {
+    if (scrollTween.current) {
+      scrollTween.current.kill();
+      scrollTween.current = null;
+    }
+    currentDirection.current = null;
   };
 
   // handle scrolling down
   const handleAutoScrollDown = () => {
     const maxScroll = getMaxScroll();
+    const currentScroll = window.scrollY;
 
-    if (scrollerRef.current && maxScroll > 0) {
+    // If already scrolling down, don't restart
+    if (currentDirection.current === "down") return;
+
+    stopCurrentScroll();
+
+    // if ((scrollerRef.current && maxScroll > 0) || startScrollingDown) {
+    if (currentScroll < maxScroll - 20 || startScrollingDown) {
       scrollTween.current = gsap.timeline();
       scrollTween.current.to(window, {
         scrollTo: { y: maxScroll },
         duration: 60,
         ease: "none",
+        // onComplete: clearAutoScroll,
         onComplete: () => {
           scrollTween.current = null;
+          currentDirection.current = null;
+          if (startScrollingDown) {
+            setStartScrollingDown(false);
+          }
         },
       });
     }
@@ -128,15 +158,28 @@ export default function ImgComp() {
 
   // handle scroll up
   const handleAutoScrollUp = () => {
-    scrollTween.current = gsap.timeline();
-    scrollTween.current.to(window, {
-      scrollTo: { y: 0 },
-      duration: 60,
-      ease: "none",
-      onComplete: () => {
-        scrollTween.current = null;
-      },
-    });
+    const currentScroll = window.scrollY;
+    // If already scrolling up, don't restart
+    if (currentDirection.current === "up") return;
+
+    stopCurrentScroll();
+
+    // if my window is greater than 1.8,
+    // my margin top of the component, animate to the top
+    if (currentScroll > 30) {
+      // currentDirection.current = "up";
+      scrollTween.current = gsap.timeline();
+      scrollTween.current.to(window, {
+        scrollTo: { y: 0 },
+        duration: 60,
+        ease: "none",
+
+        onComplete: () => {
+          scrollTween.current = null;
+          currentDirection.current = null;
+        },
+      });
+    }
   };
 
   useEffect(() => {
@@ -181,14 +224,14 @@ export default function ImgComp() {
   };
 
   const padTheTop = {
-    paddingTop: "calc(-4.163rem + 15.024dvw)",
-    paddingBottom: "1rem",
+    paddingTop: "1rem",
+    marginBottom: "1rem",
   };
 
   return (
     <main
       className="relative w-full flex flex-col items-end cursor-pointer"
-      ref={scrollerRef}
+      // ref={scrollerRef}
     >
       <div className="flex flex-col items-end mt-[1.8rem]">
         {IMG_FILE.map((item) => (
