@@ -1,0 +1,24 @@
+/* ImgComp.module.css */
+.imageWrapper {
+  overflow: hidden;
+}
+
+.image {
+  /* width: 100%; */
+  /* max-width: 100%; */
+  /* height: 20rem; */
+  /* height: auto; */
+  /* aspect-ratio: 1717 / 2136; */
+  /* object-fit: cover; */
+  /* height: calc(1.778rem + 100vh - 2.404vw); */
+  padding-top: 172.324px;
+}
+
+@media (min-width: 640px) {
+  .image {
+    max-width: calc(3.968rem + 39.903vw) !important;
+    margin-bottom: calc(-1.0815rem + 7.512vw) !important;
+    height: calc(-1.778rem + 100vh - 2.404vw);
+    padding-top: 0;
+  }
+}
