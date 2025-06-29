@@ -2,6 +2,7 @@ import { useRef, useEffect, type SetStateAction } from "react";
 import gsap from "gsap";
 import { Observer } from "gsap/all";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
+import { useGSAP } from "@gsap/react";
 
 const IMG_FILE = [
   {
@@ -99,11 +100,14 @@ gsap.registerPlugin(ScrollToPlugin, Observer);
 interface ImgCompProps {
   startScrollingDown: boolean;
   setStartScrollingDown: React.Dispatch<SetStateAction<boolean>>;
+  inViewRef: React.RefObject<HTMLImageElement | null>;
 }
 export default function ImgComp({
   startScrollingDown,
   setStartScrollingDown,
+  inViewRef,
 }: ImgCompProps) {
+  let mm = gsap.matchMedia();
   const scrollTween = useRef<gsap.core.Timeline | null>(null);
   const currentDirection = useRef<"up" | "down" | null>(null);
 
@@ -113,7 +117,8 @@ export default function ImgComp({
   };
 
   useEffect(() => {
-    if (startScrollingDown) {
+    const isLargeScreen = window.innerWidth > 768;
+    if (startScrollingDown && isLargeScreen) {
       handleAutoScrollDown();
     }
   }, [startScrollingDown]);
@@ -182,37 +187,46 @@ export default function ImgComp({
     }
   };
 
-  useEffect(() => {
-    const observer = Observer.create({
-      // the event that should should be listened to
-      target: window,
-      // action - listen for mouse wheel
-      type: "wheel",
-      onDown: handleAutoScrollDown,
-      onUp: handleAutoScrollUp,
-    });
+  useGSAP(
+    () => {
+      // for only desktop devices
+      mm.add("(min-width: 800px)", () => {
+        const observer = Observer.create({
+          // the event that should should be listened to
+          target: window,
+          // action - listen for mouse wheel
+          type: "wheel",
+          onDown: handleAutoScrollDown,
+          onUp: handleAutoScrollUp,
+        });
 
-    const handleVisibilityChange = () => {
-      // stop auto scroll if tab is hidden
-      if (document.hidden) {
-        if (scrollTween.current && scrollTween.current.isActive()) {
-          scrollTween.current.pause();
-        }
-      } else {
-        if (scrollTween.current && scrollTween.current.paused()) {
-          scrollTween.current.play();
-        }
-      }
-    };
+        const handleVisibilityChange = () => {
+          // stop auto scroll if tab is hidden
+          if (document.hidden) {
+            if (scrollTween.current && scrollTween.current.isActive()) {
+              scrollTween.current.pause();
+            }
+          } else {
+            if (scrollTween.current && scrollTween.current.paused()) {
+              scrollTween.current.play();
+            }
+          }
+        };
 
-    document.addEventListener("visibilitychange", handleVisibilityChange);
+        document.addEventListener("visibilitychange", handleVisibilityChange);
 
-    return () => {
-      observer.disable();
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      if (scrollTween.current) scrollTween.current.kill();
-    };
-  }, []);
+        return () => {
+          observer.disable();
+          document.removeEventListener(
+            "visibilitychange",
+            handleVisibilityChange
+          );
+          if (scrollTween.current) scrollTween.current.kill();
+        };
+      });
+    },
+    { dependencies: [scrollTween] }
+  );
 
   const commonContainerStyle: React.CSSProperties = {
     maxWidth: "calc(-1.782rem + 97.33dvw)",
@@ -229,10 +243,7 @@ export default function ImgComp({
   };
 
   return (
-    <main
-      className="relative w-full flex flex-col items-end cursor-pointer"
-      // ref={scrollerRef}
-    >
+    <main className="relative w-full flex flex-col items-end cursor-pointer">
       <div className="flex flex-col items-end mt-[1.8rem]">
         {IMG_FILE.map((item) => (
           <div
@@ -244,6 +255,7 @@ export default function ImgComp({
             }
           >
             <img
+              ref={item.id === "tk4" ? inViewRef : null}
               src={item.img}
               alt={`Image ${item.id}`}
               className="object-cover w-full"

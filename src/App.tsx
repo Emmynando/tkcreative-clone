@@ -2,11 +2,16 @@ import { useEffect, useRef, useState } from "react";
 import ImgComp from "./component/ImgComp";
 import gsap from "gsap";
 import TKCreativeSVG from "./component/svgs/svg";
+import { ScrollTrigger } from "gsap/all";
+import { useGSAP } from "@gsap/react";
 
+gsap.registerPlugin(ScrollTrigger, useGSAP);
 function App() {
+  const tl = gsap.timeline();
+  let mm = gsap.matchMedia();
+  const inViewRef = useRef<HTMLImageElement>(null);
   const topTextRef = useRef<HTMLDivElement>(null);
   const bottomTextRef = useRef<HTMLDivElement>(null);
-  const tl = gsap.timeline();
   const [startScrolling, setStartScrolling] = useState(false);
 
   useEffect(() => {
@@ -35,6 +40,49 @@ function App() {
     );
   }, []);
 
+  useGSAP(
+    () => {
+      if (!inViewRef.current || !topTextRef.current) return;
+      // for only mobile devices
+      mm.add(
+        "(max-width: 799px)",
+        () => {
+          gsap.to(topTextRef.current, {
+            scrollTrigger: {
+              trigger: inViewRef.current,
+              start: "2px 96%",
+              end: "bottom 10%",
+              toggleActions: "play play none none",
+              scrub: true,
+            },
+            opacity: 0,
+          });
+
+          gsap.to(bottomTextRef.current, {
+            scrollTrigger: {
+              trigger: inViewRef.current,
+              start: "2px 96%",
+              end: "bottom 10%",
+              toggleActions: "play play none none",
+              scrub: true,
+            },
+            scale: 0.8,
+            top: "5%",
+            width: "30%",
+          });
+        },
+        // scope
+        inViewRef
+      );
+    },
+    {
+      dependencies: [inViewRef, topTextRef, bottomTextRef],
+      revertOnUpdate: true,
+    }
+  );
+
+  mm.revert();
+
   const topTextStyle = {
     top: "5%",
     width: "calc(19.111rem + 14.423dvw)",
@@ -56,14 +104,21 @@ function App() {
       <ImgComp
         startScrollingDown={startScrolling}
         setStartScrollingDown={setStartScrolling}
+        inViewRef={inViewRef}
       />
       {/* <ImgComp /> */}
-      <h2
+      <div
         className="fixed bottom-[5%] z-5 w-full md:w-[30rem] lg:w-[40rem] pr-4"
         ref={bottomTextRef}
       >
         <TKCreativeSVG />
-      </h2>
+      </div>
+      {/* <div
+        className="fixed top-[8%] z-5 w-[50%] md:w-[30rem] lg:w-[40rem]"
+        ref={bottomTextRef}
+      >
+        <TKCreativeSVG />
+      </div> */}
     </div>
   );
 }
