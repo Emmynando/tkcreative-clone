@@ -3,7 +3,8 @@ import gsap from "gsap";
 import { Observer } from "gsap/all";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
 import { useGSAP } from "@gsap/react";
-import { IMG_FILE } from "../constants";
+import { IMG_FILE, MOBILE_IMG_FILE } from "../constants";
+import { FaArrowRightLong } from "react-icons/fa6";
 
 // register plugin
 gsap.registerPlugin(ScrollToPlugin, Observer);
@@ -147,21 +148,47 @@ export default function ImgComp({
     display: "flex",
     justifyContent: "flex-end",
   };
-
-  const padTheTop = {
-    paddingTop: "1rem",
-    marginBottom: "1rem",
+  const commonContainerMobStyle: React.CSSProperties = {
+    maxWidth: "calc(-1.782rem + 97.33dvw)",
+    paddingTop: "calc(8.546rem + 8.897dvw)",
+    marginBottom: "0px",
+    marginLeft: "auto",
+    display: "flex",
+    justifyContent: "flex-end",
   };
 
   return (
-    <main className="relative w-full flex flex-col items-end cursor-pointer">
-      <div className="flex flex-col items-end mt-[1.8rem]">
+    <main className="relative w-full flex flex-col items-end cursor-pointer ">
+      <div className="flex flex-col items-end mt-[1.8rem] hidden md:block ">
         {IMG_FILE.map((item) => (
           <div
             key={item.id}
             style={
               item.id !== "tk0"
                 ? { ...commonContainerStyle, ...item.containerStyle }
+                : item.containerStyle
+            }
+          >
+            <img
+              src={item.img}
+              alt={`Image ${item.id}`}
+              className="object-cover w-full"
+              style={item.imgStyle}
+            />
+          </div>
+        ))}
+        <button className="ml-auto w-max pt-[2rem] pb-[1rem] flex items-center justify-center gap-2">
+          <p className="text-2xl w-max text-right">Selected Projects</p>
+          <FaArrowRightLong />
+        </button>
+      </div>
+      <div className="flex flex-col items-end w-full mt-[10rem] md:hidden lg:hidden">
+        {MOBILE_IMG_FILE.map((item) => (
+          <div
+            key={item.id}
+            style={
+              item.id !== "tk0"
+                ? { ...commonContainerMobStyle, ...item.containerStyle }
                 : item.containerStyle
             }
           >
@@ -174,9 +201,6 @@ export default function ImgComp({
             />
           </div>
         ))}
-        <p className="text-lg" style={padTheTop}>
-          Selected Projects
-        </p>
       </div>
     </main>
   );

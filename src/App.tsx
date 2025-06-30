@@ -4,6 +4,7 @@ import gsap from "gsap";
 import TKCreativeSVG from "./component/svgs/svg";
 import { ScrollTrigger } from "gsap/all";
 import { useGSAP } from "@gsap/react";
+import { FaArrowRightLong } from "react-icons/fa6";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 function App() {
@@ -67,7 +68,7 @@ function App() {
               scrub: true,
             },
             scale: 0.8,
-            top: "5%",
+            top: "-1rem",
             width: "30%",
           });
         },
@@ -91,12 +92,7 @@ function App() {
   };
   return (
     <div className="relative px-4">
-      <p
-        style={topTextStyle}
-        className="fixed z-5"
-        // className="fixed z-5 top-[5%] font-normal md:w-ful lg:w-[36rem] text-[1.2rem] md:text-lg lg:text-[1.98rem] leading-[22.2594px] md:leading-[36.5244px] lg:leading-[36.5244px]"
-        ref={topTextRef}
-      >
+      <p ref={topTextRef} style={topTextStyle} className=" fixed z-5 text-lg">
         We believe in experiential design, placing importance on how an
         environment makes us feel & how a new space can transform and enhance
         our lives.
@@ -106,19 +102,16 @@ function App() {
         setStartScrollingDown={setStartScrolling}
         inViewRef={inViewRef}
       />
-      {/* <ImgComp /> */}
+      <button className="flex items-center justify-center gap-2 w-max mt-[6rem] block md:hidden mx-auto">
+        <p className="text-lg text-center">Selected Projects</p>
+        <FaArrowRightLong />
+      </button>
       <div
         className="fixed bottom-[5%] z-5 w-full md:w-[30rem] lg:w-[40rem] pr-4"
         ref={bottomTextRef}
       >
         <TKCreativeSVG />
       </div>
-      {/* <div
-        className="fixed top-[8%] z-5 w-[50%] md:w-[30rem] lg:w-[40rem]"
-        ref={bottomTextRef}
-      >
-        <TKCreativeSVG />
-      </div> */}
     </div>
   );
 }
