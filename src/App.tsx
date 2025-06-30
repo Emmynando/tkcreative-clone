@@ -107,7 +107,7 @@ function App() {
         <FaArrowRightLong />
       </button>
       <div
-        className="fixed bottom-[5%] z-5 w-full md:w-[30rem] lg:w-[40rem] pr-4"
+        className="fixed bottom-[3%] md:bottom-[5%] z-5 w-full md:w-[30rem] lg:w-[40rem] pr-4"
         ref={bottomTextRef}
       >
         <TKCreativeSVG />
